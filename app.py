@@ -2,12 +2,11 @@ from sallemi import Sallemi
 from pinecone import PineconeException
 
 def return_ugly_error(msg):
-    ugly_error = f"""
-    <html>
+    ugly_error = f"""    
     <h1>Launching failed.</h1>
     <p>Error {msg} 
-    </html>
     """
+    return ugly_error
 
 class Chat:
     def __init__(self) -> None:        
@@ -54,8 +53,8 @@ except PineconeException as e:
 @app.route("/")
 def home():
     if launch_error:
-        #ret = return_ugly_error(launch_error)
-        ret = f'Sorry, failed to launch.\n\n {launch_error} '
+        ret = return_ugly_error(launch_error)
+        #ret = f'Sorry, failed to launch.\n\n {launch_error} '
     else:
         ret = render_template("index.html")
     return ret
