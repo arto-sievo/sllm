@@ -1,5 +1,6 @@
 from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
+from azure.core.exceptions import HttpResponseError
 # https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-python?tabs=azure-cli
 keyVaultName = 'kv-artodev'
 kvUrl = f'https://{keyVaultName}.vault.azure.net'
@@ -7,9 +8,14 @@ credential = DefaultAzureCredential()
 print('Getting SecretClient...')
 client = SecretClient(vault_url=kvUrl, credential=credential)
 print('Got a client, now getting secrets')
-OPENAI_API_KEY=client.get_secret('openai-api-key')
-PC_API_KEY=client.get_secret('pinecone-api-key')
-PC_ENV=client.get_secret('pinecone-environment')
+try:
+    OPENAI_API_KEY=client.get_secret('openai-api-key')
+    PC_API_KEY=client.get_secret('pinecone-api-key')
+    PC_ENV=client.get_secret('pinecone-environment')
+except HttpResponseError as e:
+    print('Failed to retrieve.')
+    print(e.__str__())
+    raise e
 
 # import configparser
 # conf = configparser.ConfigParser()
