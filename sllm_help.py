@@ -4,7 +4,9 @@ from azure.identity import DefaultAzureCredential
 keyVaultName = 'kv-artodev'
 kvUrl = f'https://{keyVaultName}.vault.azure.net'
 credential = DefaultAzureCredential()
+print('Getting SecretClient...')
 client = SecretClient(vault_url=kvUrl, credential=credential)
+print('Got a client, now getting secrets')
 OPENAI_API_KEY=client.get_secret('openai-api-key')
 PC_API_KEY=client.get_secret('pinecone-api-key')
 PC_ENV=client.get_secret('pinecone-environment')
