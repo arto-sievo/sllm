@@ -38,28 +38,10 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-
-# Translations
-*.mo
-*.pot
 
 # Django stuff:
 *.log
 
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-target/
 
 # DotEnv configuration
 .env
@@ -75,19 +57,13 @@ target/
 .vscode/
 *.code-workspace
 
-# Spyder
-.spyproject/
 
-# Jupyter NB Checkpoints
-.ipynb_checkpoints/
-
-# exclude data from source control by default
+# exclude data 
 /sllm_data/
 /data/
 .chroma/
+/temp
 
-# Mac OS-specific storage files
-.DS_Store
 
 # vim
 *.swp
