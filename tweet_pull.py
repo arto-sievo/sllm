@@ -4,8 +4,7 @@
 import requests
 import tweepy
 import configparser
-
-#header = f'\{"Authorization": "Bearer ${token}"\}'
+tweeter_handle = '@SamSammeli'
 
 def bearer_oauth(r):
     """
@@ -25,24 +24,13 @@ access_token_secret = config['twitter']['access_token_secret']
 auth = tweepy.OAuthHandler(api_key, api_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth)
-#public_tweets = api.home_timeline()
 
 import json
-public_tweets =api.user_timeline(screen_name='@SamSammeli', count=100, exclude_replies=False)
+public_tweets =api.user_timeline(screen_name=tweeter_handle, count=100, exclude_replies=False)
 selected_tweets=[] 
 for pt in public_tweets:    
     if pt.lang == 'en':
-        #st = {'id': pt.id_str, 'reply_to' :pt.in_reply_to_status_id_str, 'text':pt.text} 
-        st = {'reply_to' :pt.in_reply_to_status_id_str, 'text':pt.text} 
+        st = {'id': pt.id_str, 'reply_to' :pt.in_reply_to_status_id_str, 'text':pt.text}         
         selected_tweets.append(st)
-with open('./sllm_data/twets.txt', 'a') as f:
+with open('./data/tweetfiles/tweets.txt', 'a') as f:
     f.write(json.dumps(selected_tweets))
-#res = requests.get(url='https://api.twitter.com/2/tweets/search/recent?query=from:twitterdev', auth=bearer_oauth)
-#res = requests.get(url='https://api.twitter.com/2/tweets/search/recent?query=from:twitterdev', headers=header)
-#curl --request GET 'https://api.twitter.com/2/users/by/username/USER_NAME --header 'Authorization: Bearer XXXXXX'
-#res = requests.get(url='https://api.twitter.com/2/users/by/username/hemmu_r2', headers=header)
-#res = requests.get('https://www.google.com')
-# --header 'Authorization: Bearer $BEARER_TOKEN'
-#with open('twets.txt', 'w') as f:
-#    f.write(res.text)
-#    f.write(public_tweets)

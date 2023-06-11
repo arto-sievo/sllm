@@ -7,28 +7,25 @@ import pinecone
 from langchain.agents import Tool
 from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA    
-    
+import os    
 
 
 class MyKnowledgeBase:
     def __init__(self) -> None:
-        self.files = [
-            './sllm_data/spendanal.txt',
-            './sllm_data/procu_an.txt',
-            './sllm_data/procu_data.txt',
-        ] 
         self.txts = [] 
     def load_documents(self):
+        filepath = './data/textfiles'
+        txtfiles = os.listdir(filepath)
         chunkdocs =[] 
-        for f in self.files: 
-            doc = sh.load_doc(f)
+        for f in txtfiles: 
+            doc = sh.load_doc(os.path.join(filepath, f))
             chunkdocs.extend(sh.split_doc(doc))
         self.txts.extend([c.page_content for c in chunkdocs])
         self.txtids =[str(i)for i in range(0,len(self.txts))] 
  
 
-    def load_tweets(self):    
-        with open('./sllm_data/twets.txt') as f:
+    def load_tweets(self):
+        with open('./data/tweetfiles/tweets.txt') as f:
             js = json.loads(f.read())
         self.tweets = [j.get('text') for j in js ]
         self.tweetids = [j.get('id') for j in js ]
@@ -60,7 +57,6 @@ def create_pinecone_index():
             dimension=1536 
             # Supposedly 1536 is linked to the OpenAI model name.
         )
-
 
 class Sallemi:    
     def __init__(self, temp) -> None:
@@ -96,7 +92,7 @@ class Sallemi:
         # Here using Pinecone client type of index.
         self.index = pinecone.GRPCIndex(index_name)
 
-        # These only need to be done when starting the project
+        # Commenting this out because I have already loaded the data to the index
         # # Put the actual text chunks to retrieve in metadata 
         # self.upsert_to_pinecone(self.kb.txts, self.kb.txtids)
         # self.upsert_to_pinecone(self.kb.tweets, self.kb.tweetids)
