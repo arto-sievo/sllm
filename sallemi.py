@@ -50,20 +50,21 @@ def create_pinecone_index():
         api_key=sh.PC_API_KEY,
         environment=sh.PC_ENV
     )
-    if index_name not in pinecone.list_indexes():
-        pinecone.create_index(
-            name=index_name,
-            metric='dotproduct',
-            dimension=1536 
-            # Supposedly 1536 is linked to the OpenAI model name.
-        )
+    # Commenting out for the web app branch
+    # if index_name not in pinecone.list_indexes():
+    #     pinecone.create_index(
+    #         name=index_name,
+    #         metric='dotproduct',
+    #         dimension=1536 
+    #         # Supposedly 1536 is linked to the OpenAI model name.
+    #     )
 
 class Sallemi:    
     def __init__(self, temp) -> None:
         self.temp = temp
         self.kb = MyKnowledgeBase()
-        self.kb.load_documents()
-        self.kb.load_tweets()
+        # self.kb.load_documents()
+        # self.kb.load_tweets()
         self.emb = Embedder()
         create_pinecone_index()
         self.create_vectorstore()
@@ -88,11 +89,10 @@ class Sallemi:
             self.index.upsert(vectors=zvect)
 
     def create_vectorstore(self):
+        # Commenting this out because in the web app, we'll use the existing index
         # Add to index. 
         # Here using Pinecone client type of index.
-        self.index = pinecone.GRPCIndex(index_name)
-
-        # Commenting this out because I have already loaded the data to the index
+        # self.index = pinecone.GRPCIndex(index_name)
         # # Put the actual text chunks to retrieve in metadata 
         # self.upsert_to_pinecone(self.kb.txts, self.kb.txtids)
         # self.upsert_to_pinecone(self.kb.tweets, self.kb.tweetids)
