@@ -3,9 +3,8 @@ langchain
 openai
 google-api-python-client # Google API
 google-search-results # SerpAPI
-pinecone
+pinecone-client
 flask
 configparser
-json
 requests
 tweepy
