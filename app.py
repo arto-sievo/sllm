@@ -12,9 +12,6 @@ class Chat:
     def __init__(self) -> None:        
         self.prev_prompt = ''
         self.temp = 0        
-
-    def set_prompt(self, userText):
-        self.prev_prompt = userText
     
     def init_sllm(self):
         # Sallemi retains the current agent + tools and conversation history
@@ -23,9 +20,12 @@ class Chat:
     def get_response(self, userText):
         prompt = userText.lower().strip()
 
-        if prompt == 'have a drink' and self.temp <= 1: 
-            resp = f'Thanks! My temp is {self.temp}'
-            self.temp += .2
+        if prompt == 'have a drink': 
+            if self.temp <= 1: 
+                self.temp += .2
+                resp = f'Thanks!'  
+            else:
+                resp = f'Thanks! I\'ve had quite enough.'            
             self.prev_prompt = prompt
         else:
             if self.prev_prompt == 'have a drink':
@@ -33,9 +33,8 @@ class Chat:
                 # Start an agent with the same conversation history and vectorstore, but a higher temperature
                 self.sllm.define_model()
                 self.sllm.start_agent()              
-            else:
-                resp = self.sllm.agent.query(userText)
-                #resp = f'I hear you {userText}'
+            resp = self.sllm.agent(userText)
+            resp = resp['output'] 
         return resp
     
 
@@ -54,7 +53,6 @@ except PineconeException as e:
 def home():
     if launch_error:
         ret = return_ugly_error(launch_error)
-        #ret = f'Sorry, failed to launch.\n\n {launch_error} '
     else:
         ret = render_template("index.html")
     return ret
@@ -65,4 +63,4 @@ def get_bot_response():
     return chat.get_response(userText)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

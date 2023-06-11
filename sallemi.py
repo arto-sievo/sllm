@@ -7,31 +7,28 @@ import pinecone
 from langchain.agents import Tool
 from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA    
-    
+import os    
 
 
 class MyKnowledgeBase:
     def __init__(self) -> None:
-        self.files = [
-            './sllm_data/spendanal.txt',
-            './sllm_data/procu_an.txt',
-            './sllm_data/procu_data.txt',
-        ] 
         self.txts = [] 
     def load_documents(self):
+        filepath = './data/textfiles'
+        txtfiles = os.listdir(filepath)
         chunkdocs =[] 
-        for f in self.files: 
-            doc = sh.load_doc(f)
+        for f in txtfiles: 
+            doc = sh.load_doc(os.path.join(filepath, f))
             chunkdocs.extend(sh.split_doc(doc))
-        self.txts.extend([c.page_content for c in chunkdocs] ) 
+        self.txts.extend([c.page_content for c in chunkdocs])
+        self.txtids =[str(i)for i in range(0,len(self.txts))] 
+ 
 
-    def load_tweets(self):    
-        with open('./sllm_data/twets.txt') as f:
+    def load_tweets(self):
+        with open('./data/tweetfiles/tweets.txt') as f:
             js = json.loads(f.read())
-        tweettexts = [j.get('text') for j in js ]
+        self.tweets = [j.get('text') for j in js ]
         self.tweetids = [j.get('id') for j in js ]
-        self.txts.extend(tweettexts)        
-
 
 class Embedder:
     def __init__(self) -> None:
@@ -40,8 +37,8 @@ class Embedder:
             openai_api_key=sh.OPENAI_API_KEY
         )
 
-    def create_embeddings(self, kb):    
-        self.embeddings = self.embedder.embed_documents(kb.txts)
+    def create_embeddings(self, txts):    
+        return self.embedder.embed_documents(txts)
     
 index_name = 'langchain-retrieval-agent'
 
@@ -61,7 +58,6 @@ def create_pinecone_index():
             # Supposedly 1536 is linked to the OpenAI model name.
         )
 
-
 class Sallemi:    
     def __init__(self, temp) -> None:
         self.temp = temp
@@ -69,38 +65,44 @@ class Sallemi:
         self.kb.load_documents()
         self.kb.load_tweets()
         self.emb = Embedder()
-        self.emb.create_embeddings(self.kb)
-        # create_pinecone_index()
-        self.vectorstore = self.create_vectorstore()
+        create_pinecone_index()
+        self.create_vectorstore()
         self.create_conversation_memory()
         self.define_model()
         self.define_tools()
         self.agent = None
 
+    def upsert_to_pinecone(self, txts, ids):
+        # pass data to Pinecone in batches because max size is limited
+        from tqdm.auto import tqdm
+        batch_size = 30
+        for i in tqdm(range(0, len(txts), batch_size)):
+            end = min(i+batch_size, len(txts))
+            tx_batch = txts[i:end]
+            id_batch = ids[i:end]
+            # Put the actual text chunks in metadata 
+            metadata_batch =[{'text': t} for t in tx_batch]
+            ebs_batch = self.emb.create_embeddings(tx_batch)
+            # The schema is: id, text embedding, text
+            zvect = zip(id_batch, ebs_batch, metadata_batch)
+            self.index.upsert(vectors=zvect)
+
     def create_vectorstore(self):
-        # Do the actual indexing. 
-        # Using Pinecone client instead of LangChain vector store, 
-        # so specifying type of index
-        index = pinecone.GRPCIndex(index_name)
+        # Add to index. 
+        # Here using Pinecone client type of index.
+        self.index = pinecone.GRPCIndex(index_name)
 
-        # Put the actual text chunks to retrieve in metadata 
-        metadatas =[{'text': t} for t in self.kb.txts]
-
-        # Create ids for the text chunks
-        ids = [str(i) for i in range(0,len(self.kb.txts))] 
-        ids.extend(self.kb.tweetids)
-
-        # The schema is: id, text embedding, text
-        zvect = zip(ids, self.emb.embeddings, metadatas)
-        index.upsert(vectors=zvect)
-
-        # Get the index object to use with Langchain
-        index=pinecone.Index(index_name)
-
+        # Commenting this out because I have already loaded the data to the index
+        # # Put the actual text chunks to retrieve in metadata 
+        # self.upsert_to_pinecone(self.kb.txts, self.kb.txtids)
+        # self.upsert_to_pinecone(self.kb.tweets, self.kb.tweetids)
+        
         # Specify in which field the actual text chunks are
         text_field='text'
-        vectorstore = Pinecone(index, self.emb.embed_query, text_field)
-        return vectorstore
+        # Get the index object to use with Langchain
+        lc_index=pinecone.Index(index_name)
+        self.vectorstore = Pinecone(lc_index, self.emb.embedder.embed_query, text_field)
+
 
     def create_conversation_memory(self):
         self.conv_memory = ConversationBufferWindowMemory(
@@ -117,7 +119,7 @@ class Sallemi:
             retriever=self.vectorstore.as_retriever()
         )
     
-        tools =[
+        self.tools =[
             Tool(
                 name='SievoKb',
                 func=qa.run,
