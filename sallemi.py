@@ -9,10 +9,7 @@ from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA    
 import os    
 
-print('Getting secrets at sallemi.py')
 sec = sh.get_secrets()
-print(f"Back in sallemi, pc_env is now {sec['pc_env']}" )
-print('Previous line should have pc env value')
 
 class MyKnowledgeBase:
     def __init__(self) -> None:
@@ -36,7 +33,6 @@ class MyKnowledgeBase:
 
 class Embedder:
     def __init__(self) -> None:
-        print('initiating Embedder')
         self.embedder = OpenAIEmbeddings(
             model='text-embedding-ada-002',
             # openai_api_key=sh.OPENAI_API_KEY

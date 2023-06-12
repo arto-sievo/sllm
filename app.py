@@ -15,7 +15,6 @@ class Chat:
     
     def init_sllm(self):
         # Sallemi retains the current agent + tools and conversation history
-        print('Stating Sallemi in app.py')
         self.sllm = Sallemi(self.temp)
 
     def get_response(self, userText):
