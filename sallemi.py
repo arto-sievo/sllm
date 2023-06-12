@@ -11,6 +11,7 @@ import os
 
 print('Getting secrets at sallemi.py')
 sec = sh.get_secrets()
+print(sec['pc_env'].value )
 
 class MyKnowledgeBase:
     def __init__(self) -> None:
@@ -39,7 +40,7 @@ class Embedder:
         self.embedder = OpenAIEmbeddings(
             model='text-embedding-ada-002',
             # openai_api_key=sh.OPENAI_API_KEY
-            openai_api_key=sec['openai_api_key'] 
+            openai_api_key=sec['openai_api_key'].value 
         )
 
     def create_embeddings(self, txts):    
@@ -54,8 +55,8 @@ def create_pinecone_index():
     pinecone.init(
         # api_key=sh.PC_API_KEY,
         # environment=sh.PC_ENV
-        api_key=sec['pc_api_key'] ,
-        environment=sec['pc_env'] 
+        api_key=sec['pc_api_key'].value ,
+        environment=sec['pc_env'].value 
     )
     # Commenting out for the web app branch
     # if index_name not in pinecone.list_indexes():
