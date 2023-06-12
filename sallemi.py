@@ -9,6 +9,7 @@ from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA    
 import os    
 
+print('Getting secrets at sallemi.py')
 sec = sh.get_secrets()
 
 class MyKnowledgeBase:
