@@ -9,6 +9,7 @@ from langchain.vectorstores import Pinecone
 from langchain.chains import RetrievalQA    
 import os    
 
+sec = sh.get_secrets()
 
 class MyKnowledgeBase:
     def __init__(self) -> None:
@@ -34,7 +35,8 @@ class Embedder:
     def __init__(self) -> None:
         self.embedder = OpenAIEmbeddings(
             model='text-embedding-ada-002',
-            openai_api_key=sh.OPENAI_API_KEY
+            # openai_api_key=sh.OPENAI_API_KEY
+            openai_api_key=sec['openai_api_key'] 
         )
 
     def create_embeddings(self, txts):    
@@ -47,8 +49,10 @@ def create_pinecone_index():
     # https://docs.pinecone.io/docs/langchain-retrieval-agent
 
     pinecone.init(
-        api_key=sh.PC_API_KEY,
-        environment=sh.PC_ENV
+        # api_key=sh.PC_API_KEY,
+        # environment=sh.PC_ENV
+        api_key=sec['pc_api_key'] ,
+        environment=sec['pc_env'] 
     )
     # Commenting out for the web app branch
     # if index_name not in pinecone.list_indexes():
