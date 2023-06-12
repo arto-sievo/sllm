@@ -34,6 +34,8 @@ class MyKnowledgeBase:
 
 class Embedder:
     def __init__(self) -> None:
+        print('initiating Embedder')
+        sec = sh.get_secrets()
         self.embedder = OpenAIEmbeddings(
             model='text-embedding-ada-002',
             # openai_api_key=sh.OPENAI_API_KEY
