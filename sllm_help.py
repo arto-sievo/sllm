@@ -8,11 +8,11 @@ def get_secrets():
     kvUrl = f'https://{keyVaultName}.vault.azure.net'
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=kvUrl, credential=credential)
-    print('Got a client, now getting secrets')
+    print('Inside sh, got a client, now getting secrets')
     try:
-        OPENAI_API_KEY=client.get_secret('openai-api-key')
-        PC_API_KEY=client.get_secret('pinecone-api-key')
-        PC_ENV=client.get_secret('pinecone-environment')
+        OPENAI_API_KEY=client.get_secret('openai-api-key').value
+        PC_API_KEY=client.get_secret('pinecone-api-key').value
+        PC_ENV=client.get_secret('pinecone-environment').value
         print(f'Success! pc_env: {PC_ENV} ')
     except HttpResponseError as e:
         print('Failed to retrieve.')
