@@ -13,7 +13,7 @@ def get_secrets():
         OPENAI_API_KEY=client.get_secret('openai-api-key').value
         PC_API_KEY=client.get_secret('pinecone-api-key').value
         PC_ENV=client.get_secret('pinecone-environment').value
-        print(f'Success! pc_env: {PC_ENV} ')
+        print(f'Success! pc_env: {PC_ENV} -!')
     except HttpResponseError as e:
         print('Failed to retrieve.')
         print(e.__str__())
